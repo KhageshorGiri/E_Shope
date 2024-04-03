@@ -2,6 +2,7 @@
 using ProductService.Application.MappingProfileExtension;
 using ProductService.Application.ServiceInterfaces;
 using ProductService.Domain.IRepositories;
+using System.Threading;
 
 namespace ProductService.Application.Services
 {
@@ -14,19 +15,19 @@ namespace ProductService.Application.Services
             _productRepository = productRepositorycs;
         }
 
-        public async Task<ProductDto?> GetByIdAsync(int id)
+        public async Task<ProductDto?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var product = await _productRepository.GetByIdAsync(id);
+            var product = await _productRepository.GetByIdAsync(id, cancellationToken);
             return product?.ToProductDto();
         }
 
-        public async Task<IEnumerable<ProductDto>?> GetAllAsync()
+        public async Task<IEnumerable<ProductDto>?> GetAllAsync(CancellationToken cancellationToken)
         {
-            var allProducts = await _productRepository.GetAllAsync();
+            var allProducts = await _productRepository.GetAllAsync(cancellationToken);
             return allProducts?.Select(product => product.ToProductDto());
         }
 
-        public async Task AddAsync(CreateProductDto product)
+        public async Task AddAsync(CreateProductDto product, CancellationToken cancellationToken)
         {
             var productToAdd = product.ToProduct();
 
@@ -36,12 +37,12 @@ namespace ProductService.Application.Services
             productToAdd.CreatedDate = DateTime.UtcNow.Date;
             productToAdd.ModifiedDate = DateTime.UtcNow.Date;
 
-            await _productRepository.AddAsync(productToAdd);
+            await _productRepository.AddAsync(productToAdd, cancellationToken);
         }
 
-        public async Task UpdateAsync(int id, UpdateProductDto product)
+        public async Task UpdateAsync(int id, UpdateProductDto product, CancellationToken cancellationToken)
         {
-            var productToUpdate = await _productRepository.GetByIdAsync(id);
+            var productToUpdate = await _productRepository.GetByIdAsync(id, cancellationToken);
 
             if (productToUpdate == null)
             {
@@ -54,19 +55,19 @@ namespace ProductService.Application.Services
             productToUpdate.ModifiedBy = 1;
             productToUpdate.ModifiedDate = DateTime.UtcNow.Date;
 
-            await _productRepository.UpdateAsync(productToUpdate);
+            await _productRepository.UpdateAsync(productToUpdate, cancellationToken);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            var productToDelete = await _productRepository.GetByIdAsync(id);
+            var productToDelete = await _productRepository.GetByIdAsync(id, cancellationToken);
 
             if (productToDelete == null)
             {
                 throw new ArgumentOutOfRangeException($"Product with ID {id} not found.");
             }
             productToDelete.IsDeleted = true;
-            await _productRepository.DeleteAsync(productToDelete);
+            await _productRepository.DeleteAsync(productToDelete, cancellationToken);
         }
 
        

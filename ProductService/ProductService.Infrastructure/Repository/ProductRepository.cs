@@ -14,72 +14,72 @@ namespace ProductService.Infrastructure.Repository
             _dbContext = context;
         }
 
-        public async Task<Product?> GetByIdAsync(int id)
+        public async Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken = default(CancellationToken))
         {
             return await _dbContext.Products.Where(x => x.Id == id)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(cancellationToken);
                                          
         }
 
-        public async Task<IEnumerable<Product>?> GetAllAsync()
+        public async Task<IEnumerable<Product>?> GetAllAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             return await _dbContext.Products.AsNoTracking()
-                                          .ToListAsync();
+                                          .ToListAsync(cancellationToken);
         }
 
-        public async Task AddAsync(Product product)
+        public async Task AddAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using(var transaction = await _dbContext.Database.BeginTransactionAsync())
+            using(var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken))
             {
                 try
                 {
                     _dbContext.Products.Add(product);
-                    await _dbContext.SaveChangesAsync();
+                    await _dbContext.SaveChangesAsync(cancellationToken);
 
-                    await transaction.CommitAsync();
+                    await transaction.CommitAsync(cancellationToken);
                 }
                 catch(Exception ex)
                 {
-                    await transaction.RollbackAsync();
+                    await transaction.RollbackAsync(cancellationToken);
                     throw;
                 }
             }
         }
 
-        public async Task UpdateAsync(Product product)
+        public async Task UpdateAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+            using (var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken))
             {
                 try
                 {
                     _dbContext.Products.Update(product);
-                    await _dbContext.SaveChangesAsync();
+                    await _dbContext.SaveChangesAsync(cancellationToken);
 
-                    await transaction.CommitAsync();
+                    await transaction.CommitAsync(cancellationToken);
                 }
                 catch (Exception ex)
                 {
-                    await transaction.RollbackAsync();
+                    await transaction.RollbackAsync(cancellationToken);
                     throw;
                 }
             }
         }
 
-        public async Task DeleteAsync(Product product)
+        public async Task DeleteAsync(Product product, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+            using (var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken))
             {
                 try
                 {
                     _dbContext.Products.Update(product);
-                    await _dbContext.SaveChangesAsync();
+                    await _dbContext.SaveChangesAsync(cancellationToken);
 
-                    await transaction.CommitAsync();
+                    await transaction.CommitAsync(cancellationToken);
                 }
                 catch (Exception ex)
                 {
-                    await transaction.RollbackAsync();
+                    await transaction.RollbackAsync(cancellationToken);
                     throw;
                 }
             }
