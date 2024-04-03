@@ -72,7 +72,7 @@ namespace ProductService.Infrastructure.Repository
             {
                 try
                 {
-                    _dbContext.Products.Remove(product);
+                    _dbContext.Products.Update(product);
                     await _dbContext.SaveChangesAsync();
 
                     await transaction.CommitAsync();

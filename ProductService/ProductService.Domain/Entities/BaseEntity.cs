@@ -8,6 +8,9 @@ namespace ProductService.Domain.Entities
         public int Id { get; set; }
 
         [Required]
+        public bool IsDeleted { get; set; } = false;
+
+        [Required]
         public int CreatedBy { get; set; }
 
         [Required]

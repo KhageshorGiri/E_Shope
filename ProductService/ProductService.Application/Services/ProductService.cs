@@ -1,4 +1,5 @@
 ﻿using ProductService.Application.Dtos;
+using ProductService.Application.MappingProfileExtension;
 using ProductService.Application.ServiceInterfaces;
 using ProductService.Domain.IRepositories;
 
@@ -16,27 +17,56 @@ namespace ProductService.Application.Services
         public async Task<ProductDto?> GetByIdAsync(int id)
         {
             var product = await _productRepository.GetByIdAsync(id);
-            throw new NotImplementedException();
+            return product?.ToProductDto();
         }
 
-        public Task<IEnumerable<ProductDto>?> GetAllAsync()
+        public async Task<IEnumerable<ProductDto>?> GetAllAsync()
         {
-            throw new NotImplementedException();
+            var allProducts = await _productRepository.GetAllAsync();
+            return allProducts?.Select(product => product.ToProductDto());
         }
 
-        public Task AddAsync(CreateProductDto product)
+        public async Task AddAsync(CreateProductDto product)
         {
-            throw new NotImplementedException();
+            var productToAdd = product.ToProduct();
+
+            productToAdd.CreatedBy = 1;
+            productToAdd.ModifiedBy = 1;
+            productToAdd.IsDeleted = false;
+            productToAdd.CreatedDate = DateTime.UtcNow.Date;
+            productToAdd.ModifiedDate = DateTime.UtcNow.Date;
+
+            await _productRepository.AddAsync(productToAdd);
         }
 
-        public Task UpdateAsync(UpdateProductDto product)
+        public async Task UpdateAsync(int id, UpdateProductDto product)
         {
-            throw new NotImplementedException();
+            var productToUpdate = await _productRepository.GetByIdAsync(id);
+
+            if (productToUpdate == null)
+            {
+                throw new ArgumentOutOfRangeException($"Product with ID {id} not found.");
+            }
+
+            productToUpdate.ProductName = product.ProductName;
+            productToUpdate.ProductDescription = product.ProductDescription;
+            productToUpdate.Price = product.Price;
+            productToUpdate.ModifiedBy = 1;
+            productToUpdate.ModifiedDate = DateTime.UtcNow.Date;
+
+            await _productRepository.UpdateAsync(productToUpdate);
         }
 
-        public Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var productToDelete = await _productRepository.GetByIdAsync(id);
+
+            if (productToDelete == null)
+            {
+                throw new ArgumentOutOfRangeException($"Product with ID {id} not found.");
+            }
+            productToDelete.IsDeleted = true;
+            await _productRepository.DeleteAsync(productToDelete);
         }
 
        

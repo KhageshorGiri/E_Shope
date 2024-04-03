@@ -8,7 +8,7 @@ namespace ProductService.Application.ServiceInterfaces
         Task<ProductDto?> GetByIdAsync(int id);
         Task<IEnumerable<ProductDto>?> GetAllAsync();
         Task AddAsync(CreateProductDto product);
-        Task UpdateAsync(UpdateProductDto product);
+        Task UpdateAsync(int id, UpdateProductDto product);
         Task DeleteAsync(int id);
     }
 }
