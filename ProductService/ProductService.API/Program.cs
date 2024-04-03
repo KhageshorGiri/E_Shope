@@ -1,33 +1,95 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
 using ProductService.API;
+using ProductService.Infrastructure.DataContext;
+using Serilog;
+using System.Net.Mime;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Loger configuration
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-
-var app = builder.Build();
-
-app.UseStatusCodePages();
-app.UseExceptionHandler();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    builder.Logging.ClearProviders();
+    builder.Logging.AddSerilog(logger);
+
+    logger.Information("Starting web application");
+
+    // Add services to the container.
+
+    // Add DbContext Service
+    builder.Services.AddDbContext<ProductServiceDbContext>(option =>
+                    option.UseNpgsql(builder.Configuration.GetConnectionString("PostgraceSqlServerConnection")));
+
+    builder.Services.AddControllers();
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+    //health checks
+    builder.Services.AddHealthChecks()
+        .AddNpgSql(builder.Configuration.GetConnectionString("PostgraceSqlServerConnection"));
+        
+
+    builder.Services.AddProblemDetails();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+    var app = builder.Build();
+
+    app.UseStatusCodePages();
+    app.UseExceptionHandler();
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    // Health check Middleware configuration
+    app.MapHealthChecks("/health", new HealthCheckOptions()
+    {
+        ResponseWriter = async (context, report) =>
+        {
+            var result = JsonSerializer.Serialize(
+                new
+                {
+                    status = report.Status.ToString(),
+                    checks = report.Entries.Select(entry => new
+                    {
+                        name = entry.Key.ToString(),
+                        status = entry.Value.Status.ToString(),
+                        exception = entry.Value.Exception is not null ? entry.Value.Exception.Message : "none",
+                        duration = entry.Value.Duration.ToString()
+                    })
+                });
+
+            context.Response.ContentType = MediaTypeNames.Application.Json;
+            await context.Response.WriteAsync(result);
+        }
+    });
+
+    app.Run();
 }
 
-app.UseHttpsRedirection();
+catch (Exception ex)
+{
+    logger.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
 
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
