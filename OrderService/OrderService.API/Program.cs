@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using OrderService.Application.ServiceInterfaces;
+using OrderService.Application.Services;
+using OrderService.Domain.IRepositories;
 using OrderService.Infrastructure.Data;
+using OrderService.Infrastructure.Repositories;
 using Serilog;
 using System.Net.Mime;
 using System.Text.Json;
@@ -30,6 +34,10 @@ try
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
+
+    // Registering services
+    builder.Services.AddScoped<IOrderService, OrdersService>();
+    builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 
     //health checks

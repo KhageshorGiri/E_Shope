@@ -1,43 +1,74 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OrderService.Application.Dtos;
+using OrderService.Application.ServiceInterfaces;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace OrderService.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class OrdersController : ControllerBase
     {
-        // GET: api/<OrdersController>
+        private readonly IOrderService _orderService;
+
+        public OrdersController(IOrderService orderService)
+        {
+            _orderService = orderService;
+        }
+
+        // GET : api/Orders
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<IActionResult> Get()
         {
-            return new string[] { "value1", "value2" };
+            var allOrders = await _orderService.GetAllAsync();
+            return Ok(allOrders);
         }
 
-        // GET api/<OrdersController>/5
+        // GET : api/Orders/id
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return "value";
+            var existingOrder = await _orderService.GetOrderByIdAsync(id);
+            if(existingOrder is null)
+            {
+                return NoContent();
+            }
+            return Ok(existingOrder);
         }
 
-        // POST api/<OrdersController>
+        // POST : api/Orders
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> Post([FromBody] CreateOrderDto order)
         {
+            await _orderService.AddAsync(order);
+            return Ok("Added");
         }
 
-        // PUT api/<OrdersController>/5
+        // PUT : api/Orders/id
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> Put(int id, [FromBody] UpdateOrderDto order)
         {
+            var existingOrder = _orderService.GetOrderByIdAsync(id);
+            if(existingOrder is null)
+            {
+                return NoContent();
+            }
+            await _orderService.UpdateAsync(id, order);
+            return Ok("Updated");
         }
 
-        // DELETE api/<OrdersController>/5
+        // DELETE : api/Orders/id
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            var existingOrder = _orderService.GetOrderByIdAsync(id);
+            if (existingOrder is null)
+            {
+                return NoContent();
+            }
+            await _orderService.DeleteAsync(id);
+            return Ok("Deleted");
         }
     }
 }
