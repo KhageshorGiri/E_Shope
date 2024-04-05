@@ -3,20 +3,24 @@
     "BaseUrl": "https://localhost:7279/" // Base URL for the services
   },
   "Routes": [
+
+    // Route for Product Service
     {
-      "DownstreamPathTemplate": "/api/products/{everything}", // Route for all requests
+      "DownstreamPathTemplate": "/api/products",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 8080
+          "Port": 5031
         }
       ],
-      "UpstreamPathTemplate": "/products/{everything}",
+      "UpstreamPathTemplate": "/products",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ] // All HTTP methods
     },
+
+    // Route for Order Service
     {
-      "DownstreamPathTemplate": "/api/orders/{everything}", // Route for all requests
+      "DownstreamPathTemplate": "/api/orders",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -24,7 +28,7 @@
           "Port": 8081
         }
       ],
-      "UpstreamPathTemplate": "/orders/{everything}", 
+      "UpstreamPathTemplate": "/orders",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ] // All HTTP methods
     }
   ],
