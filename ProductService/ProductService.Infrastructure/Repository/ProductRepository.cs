@@ -5,7 +5,7 @@ using ProductService.Infrastructure.DataContext;
 
 namespace ProductService.Infrastructure.Repository
 {
-    public class ProductRepository : IProductRepositorycs
+    public class ProductRepository : IProductRepository
     {
         private readonly ProductServiceDbContext _dbContext;
 

@@ -2,7 +2,7 @@
 
 namespace ProductService.Domain.IRepositories
 {
-    public interface IProductRepositorycs
+    public interface IProductRepository
     {
         Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken);
         Task<IEnumerable<Product>?> GetAllAsync(CancellationToken cancellationToken);

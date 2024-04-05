@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using ProductService.API;
+using ProductService.Application.ServiceInterfaces;
+using ProductService.Application.Services;
+using ProductService.Domain.IRepositories;
 using ProductService.Infrastructure.DataContext;
+using ProductService.Infrastructure.Repository;
 using Serilog;
 using System.Net.Mime;
 using System.Text.Json;
@@ -31,6 +35,10 @@ try
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
+
+    // Service Registration
+    builder.Services.AddScoped<IProductRepository, ProductRepository>();
+    builder.Services.AddScoped<IProductService, ProductsService>();
 
     //health checks
     builder.Services.AddHealthChecks()

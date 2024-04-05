@@ -6,11 +6,11 @@ using System.Threading;
 
 namespace ProductService.Application.Services
 {
-    public class ProductService : IProductService
+    public class ProductsService : IProductService
     {
-        private readonly IProductRepositorycs _productRepository;
+        private readonly IProductRepository _productRepository;
 
-        public ProductService(IProductRepositorycs productRepositorycs)
+        public ProductsService(IProductRepository productRepositorycs)
         {
             _productRepository = productRepositorycs;
         }

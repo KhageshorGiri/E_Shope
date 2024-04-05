@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using ProductService.Application.Dtos;
 using ProductService.Application.ServiceInterfaces;
-using ProductService.Domain.Entities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,10 +12,12 @@ namespace ProductService.API.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(IProductService productService)
+        public ProductsController(IProductService productService, ILogger<ProductsController> logger)
         {
             _productService = productService;
+            _logger = logger;
         }
 
         // GET : api/Products
@@ -32,7 +32,7 @@ namespace ProductService.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
         {
-            var product = _productService.GetByIdAsync(id, cancellationToken);
+            var product = await _productService.GetByIdAsync(id, cancellationToken);
             if(product is null)
             {
                 return NoContent();
