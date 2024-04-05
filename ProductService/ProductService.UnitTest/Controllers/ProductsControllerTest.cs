@@ -1,13 +1,10 @@
-﻿using Castle.Components.DictionaryAdapter.Xml;
-using FluentAssertions;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProductService.API.Controllers;
 using ProductService.Application.Dtos;
-using ProductService.Application.MappingProfileExtension;
 using ProductService.Application.ServiceInterfaces;
 using ProductService.Domain.Entities;
 
@@ -21,7 +18,7 @@ namespace ProductService.UnitTest.Controllers
 
 
         [Fact]
-        public async Task GetProduct_WhenUnExistingProduct_ReturnNotFound()
+        public async Task Get_WhenUnExistingProduct_ReturnNotFound()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
@@ -38,7 +35,7 @@ namespace ProductService.UnitTest.Controllers
         }
 
         [Fact]
-        public async Task GetAllProducts_WithExistingProducts_ReturnExpectedProducts()
+        public async Task Get_WithExistingProducts_ReturnExpectedProducts()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
@@ -60,7 +57,7 @@ namespace ProductService.UnitTest.Controllers
         }
 
         [Fact]
-        public async Task AddProduct_WithProductToAdd_ReturnResponseOk()
+        public async Task Post_WithProductToAdd_ReturnResponseOk()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
@@ -78,23 +75,122 @@ namespace ProductService.UnitTest.Controllers
         }
 
         [Fact]
-        public async Task AddProduct_WithInvalidProduct_ReturnResponseBadRequest()
+        public async Task Post_InvalidProduct_ReturnsBadRequest()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
             var productToAdd = CreateRandomProductDto();
             productToAdd.ProductName = null;
-            
+
+            var controller = new ProductsController(serviceStub.Object, logger.Object);
+            controller.ModelState.AddModelError("Name", "Name is required");
+            controller.ModelState.AddModelError("Price", "Price must be positive");
+
+            // Act
+            var result = await controller.Post(productToAdd, cancellationToken);
+
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        [Fact]
+        public async Task Put_WhenNonExistingProduct_ReturnsNoContent()
+        {
+            // Arrange
+            var cancellationToken = new CancellationToken();
+            var existingProduct = UpdateRandomProductDto();
+
+            serviceStub.Setup(service => service.GetByIdAsync(It.IsAny<int>(), cancellationToken))
+                .ReturnsAsync((ProductDto?)null);
+
             var controller = new ProductsController(serviceStub.Object, logger.Object);
 
             // Act
-            var actionResult = await controller.Post(productToAdd, cancellationToken);
-            var result = actionResult as OkObjectResult;
+            var result = await controller.Put(It.IsAny<int>(), existingProduct, cancellationToken);
 
             // Assert
-            actionResult.Should().BeOfType<BadRequestObjectResult>();
-            var modelStateErrors = result?.Value as ModelStateDictionary;
-            modelStateErrors.Should().NotBeEmpty();
+            result.Should().BeOfType<NoContentResult>();
+        }
+
+        [Fact]
+        public async Task Put_WhenExistingProduct_ReturnsOk()
+        {
+            // Arrange
+            var cancellationToken = new CancellationToken();
+            var existingProduct = UpdateRandomProductDto();
+            var expectedProduct = RandomProductDto();
+
+            serviceStub.Setup(service => service.GetByIdAsync(It.IsAny<int>(), cancellationToken))
+                .ReturnsAsync(expectedProduct);
+
+            var controller = new ProductsController(serviceStub.Object, logger.Object);
+
+            // Act
+            var result = await controller.Put(It.IsAny<int>(), existingProduct, cancellationToken);
+            var okResult = result as OkObjectResult;
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>();
+            okResult?.Value.Should().Be("Updated");
+        }
+
+        [Fact]
+        public async Task Put_InvalidProduct_ReturnsBadRequest()
+        {
+            // Arrange
+            var cancellationToken = new CancellationToken();
+            var productToUpdate = UpdateRandomProductDto();
+            productToUpdate.ProductName = null;
+
+            var controller = new ProductsController(serviceStub.Object, logger.Object);
+            controller.ModelState.AddModelError("Name", "Name is required");
+            controller.ModelState.AddModelError("Price", "Price must be positive");
+
+            // Act
+            var result = await controller.Put(It.IsAny<int>(), productToUpdate, cancellationToken);
+
+            // Assert
+            result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        [Fact]
+        public async Task Delete_ProductDoesNotExist_ReturnsNoContent()
+        {
+            // Arrange
+            var cancellationToken = new CancellationToken();
+            serviceStub.Setup(service => service.GetByIdAsync(It.IsAny<int>(), cancellationToken))
+                              .ReturnsAsync((ProductDto?)null); // Assuming product does not exist
+
+            var controller = new ProductsController(serviceStub.Object, logger.Object);
+
+            // Act
+            var result = await controller.Delete(It.IsAny<int>(), cancellationToken);
+
+            // Assert
+            result.Should().BeOfType<NoContentResult>();
+        }
+
+        [Fact]
+        public async Task Delete_ProductExists_ReturnsOk()
+        {
+            // Arrange
+            var cancellationToken = new CancellationToken();
+            var expectedPrduct = RandomProductDto();
+            serviceStub.Setup(service => service.GetByIdAsync(It.IsAny<int>(), cancellationToken))
+                              .ReturnsAsync(expectedPrduct);
+
+            serviceStub.Setup(service => service.DeleteAsync(It.IsAny<int>(), cancellationToken))
+                              .Returns(Task.CompletedTask);
+
+            var controller = new ProductsController(serviceStub.Object, logger.Object);
+
+            // Act
+            var result = await controller.Delete(It.IsAny<int>(), cancellationToken);
+            var okResult = result as OkObjectResult;
+
+            // Assert
+            result.Should().BeOfType<OkObjectResult>();
+            okResult?.Value.Should().Be("Deleted.");
         }
 
         #region Private Helper Function
