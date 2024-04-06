@@ -41,7 +41,7 @@ namespace ProductService.UnitTest.Repositories
         }
 
         [Fact]
-        public async Task GetByIdAsync_WhenUnExistingProduct_ReturnNull()
+        public async Task GetByIdAsync_WhenUnExistingProduct_ReturnVoid()
         {
             // Arrange
             dbContext = new ProductServiceDbContext(optionsBuilder.Options);
@@ -91,7 +91,7 @@ namespace ProductService.UnitTest.Repositories
         }
 
         [Fact]
-        public async Task AddAsync_WhenNewProduct_ReturnNothng()
+        public async Task AddAsync_WhenNewProduct_ReturnVoid()
         {
             // Arrange
             dbContext = new ProductServiceDbContext(optionsBuilder.Options);
@@ -107,7 +107,7 @@ namespace ProductService.UnitTest.Repositories
         }
 
         [Fact]
-        public async Task UpdateAsync_WhenNewProduct_ReturnNothng()
+        public async Task UpdateAsync_WhenNewProduct_ReturnVoid()
         {
             // Arrange
             dbContext = new ProductServiceDbContext(optionsBuilder.Options);
@@ -123,7 +123,7 @@ namespace ProductService.UnitTest.Repositories
         }
 
         [Fact]
-        public async Task DeleteAsync_WhenNewProduct_ReturnNothng()
+        public async Task DeleteAsync_WhenNewProduct_ReturnVoid()
         {
             // Arrange
             dbContext = new ProductServiceDbContext(optionsBuilder.Options);

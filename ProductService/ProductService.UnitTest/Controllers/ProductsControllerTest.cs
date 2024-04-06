@@ -1,12 +1,10 @@
 ﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProductService.API.Controllers;
 using ProductService.Application.Dtos;
 using ProductService.Application.ServiceInterfaces;
-using ProductService.Domain.Entities;
 
 namespace ProductService.UnitTest.Controllers
 {
