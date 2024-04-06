@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Serilog;
 using System.Net.Mime;
 using System.Text.Json;
 
@@ -25,11 +26,8 @@ namespace ProductService.API.Configuration
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
             app.MapControllers();
-
 
         }
 

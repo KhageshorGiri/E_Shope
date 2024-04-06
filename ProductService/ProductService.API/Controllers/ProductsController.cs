@@ -2,8 +2,6 @@
 using ProductService.Application.Dtos;
 using ProductService.Application.ServiceInterfaces;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace ProductService.API.Controllers
 {
     [Route("api/[controller]")]
@@ -24,7 +22,9 @@ namespace ProductService.API.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
+            _logger.LogInformation("GET request received for all products.");
             var allProducts = await _productService.GetAllAsync(cancellationToken);
+            _logger.LogInformation("Retrieved all products successfully.");
             return Ok(allProducts);
         }
 
@@ -32,11 +32,13 @@ namespace ProductService.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("GET request received for product with ID {ProductId}.", id);
             var product = await _productService.GetByIdAsync(id, cancellationToken);
             if(product is null)
             {
                 return NoContent();
             }
+            _logger.LogInformation("Retrieved product with ID {ProductId} successfully.", id);
             return Ok(product);
         }
 
@@ -44,11 +46,14 @@ namespace ProductService.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateProductDto product, CancellationToken cancellationToken)
         {
-            if(!ModelState.IsValid)
+            _logger.LogInformation("POST request received to create a new product {0}.", product);
+            if (!ModelState.IsValid)
             {
+                _logger.LogInformation("Invalid model state received in the POST request {0}.", ModelState.ToString());
                 return BadRequest(ModelState);
             }
             await _productService.AddAsync(product, cancellationToken);
+            _logger.LogInformation("New product created successfully {0}.", product);
             return Ok("Success.");
         }
 
@@ -56,8 +61,10 @@ namespace ProductService.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] UpdateProductDto product, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("PUT request received to update product with ID {ProductId}.", id);
             if (!ModelState.IsValid)
             {
+                _logger.LogInformation("Invalid model state received in the Pust request {0}.", ModelState.ToString());
                 return BadRequest(ModelState);
             }
             var existingProduct = await _productService.GetByIdAsync(id, cancellationToken);
@@ -66,6 +73,7 @@ namespace ProductService.API.Controllers
                 return NoContent();
             }
             await _productService.UpdateAsync(id, product, cancellationToken);
+            _logger.LogInformation("Product with ID {ProductId} updated successfully.", id);
             return Ok("Updated");
         }
 
@@ -73,12 +81,14 @@ namespace ProductService.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("DELETE request received to delete product with ID {ProductId}.", id);
             var existingProduct = await _productService.GetByIdAsync(id, cancellationToken);
             if (existingProduct is null)
             {
                 return NoContent();
             }
             await _productService.DeleteAsync(id, cancellationToken);
+            _logger.LogInformation("Product with ID {ProductId} deleted successfully.", id);
             return Ok("Deleted.");
         }
     }

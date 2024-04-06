@@ -1,9 +1,9 @@
-﻿using ProductService.Application.Dtos;
+﻿using Microsoft.Extensions.Logging;
+using ProductService.Application.Dtos;
 using ProductService.Application.MappingProfileExtension;
 using ProductService.Application.Messaging;
 using ProductService.Application.ServiceInterfaces;
 using ProductService.Domain.IRepositories;
-using System.Threading;
 
 namespace ProductService.Application.Services
 {
@@ -11,23 +11,29 @@ namespace ProductService.Application.Services
     {
         private readonly IProductRepository _productRepository;
         private readonly IEventPublisher _eventPublisher;
+        private ILogger<ProductsService> _logger;
         private readonly string _eventTopic = "product_service_topic";
 
-        public ProductsService(IProductRepository productRepositorycs, IEventPublisher eventPublisher)
+        public ProductsService(IProductRepository productRepositorycs, IEventPublisher eventPublisher, ILogger<ProductsService> logger)
         {
             _productRepository = productRepositorycs;
             _eventPublisher = eventPublisher;
+            _logger = logger;
         }
 
         public async Task<ProductDto?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Request Recived and Forwarding to Repository");
             var product = await _productRepository.GetByIdAsync(id, cancellationToken);
+            _logger.LogInformation("Product Service Called successfully for {0} service method", nameof(GetByIdAsync));
             return product?.ToProductDto();
         }
 
         public async Task<IEnumerable<ProductDto>?> GetAllAsync(CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Request Recived and Forwarding to Repository");
             var allProducts = await _productRepository.GetAllAsync(cancellationToken);
+            _logger.LogInformation("Product Service Called successfully for {0} service method", nameof(GetAllAsync));
             return allProducts?.Select(product => product.ToProductDto());
         }
 
@@ -41,8 +47,11 @@ namespace ProductService.Application.Services
             productToAdd.CreatedDate = DateTime.UtcNow.Date;
             productToAdd.ModifiedDate = DateTime.UtcNow.Date;
 
+            _logger.LogInformation("Request Recived and Forwarding to Repository");
             await _productRepository.AddAsync(productToAdd, cancellationToken);
-            await _eventPublisher.PublishAsync(_eventTopic, productToAdd.ToString());
+            _logger.LogInformation("Product Service Called successfully for {0} service method", nameof(AddAsync));
+            //await _eventPublisher.PublishAsync(_eventTopic, productToAdd.ToString());
+            //_logger.LogInformation("Product Service Event Published successfully for topic {0}, with {1} service method", _eventTopic, productToAdd.ToString());
         }
 
         public async Task UpdateAsync(int id, UpdateProductDto product, CancellationToken cancellationToken)
@@ -60,8 +69,11 @@ namespace ProductService.Application.Services
             productToUpdate.ModifiedBy = 1;
             productToUpdate.ModifiedDate = DateTime.UtcNow.Date;
 
+            _logger.LogInformation("Request Recived and Forwarding to Repository");
             await _productRepository.UpdateAsync(productToUpdate, cancellationToken);
-            await _eventPublisher.PublishAsync(_eventTopic, productToUpdate.ToString());
+            _logger.LogInformation("Product Service Called successfully for {0} service method", nameof(UpdateAsync));
+            //await _eventPublisher.PublishAsync(_eventTopic, productToUpdate.ToString());
+            //_logger.LogInformation("Product Service Event Published successfully for topic {0}, with {1} service method", _eventTopic, productToUpdate.ToString());
         }
 
         public async Task DeleteAsync(int id, CancellationToken cancellationToken)
@@ -73,7 +85,10 @@ namespace ProductService.Application.Services
                 throw new ArgumentOutOfRangeException($"Product with ID {id} not found.");
             }
             productToDelete.IsDeleted = true;
+
+            _logger.LogInformation("Request Recived and Forwarding to Repository");
             await _productRepository.DeleteAsync(productToDelete, cancellationToken);
+            _logger.LogInformation("Product Service Called successfully for {0} service method", nameof(DeleteAsync));
         }
 
        

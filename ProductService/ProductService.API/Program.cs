@@ -11,6 +11,7 @@ var logger = new LoggerConfiguration()
 
 try
 {
+    // Configure serilog logger globally.
     builder.Logging.ClearProviders();
     builder.Logging.AddSerilog(logger);
 
@@ -20,10 +21,9 @@ try
     builder.RegisterDbConfiguration();
     builder.ServicesPilelineConfiguration();
 
+    // Moddleware Configuration
     var app = builder.Build();
-
     app.MiddleWarePipelIne();
-
     app.Run();
 }
 

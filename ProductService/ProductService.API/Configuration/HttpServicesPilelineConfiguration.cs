@@ -34,10 +34,11 @@ namespace ProductService.API.Configuration
         private static void RegisterServices(WebApplicationBuilder builder) 
         {
 
-            // Service Registration
+            // Product Service and repository
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<IProductService, ProductsService>();
 
+            // Kafka Service
             builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 
         }
