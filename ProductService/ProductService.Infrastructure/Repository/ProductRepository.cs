@@ -16,7 +16,7 @@ namespace ProductService.Infrastructure.Repository
 
         public async Task<Product?> GetByIdAsync(int id, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await _dbContext.Products.Where(x => x.Id == id)
+            return await _dbContext.Products.Where(x => x.Id == id && x.IsDeleted == false)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(cancellationToken);
                                          
@@ -24,7 +24,7 @@ namespace ProductService.Infrastructure.Repository
 
         public async Task<IEnumerable<Product>?> GetAllAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await _dbContext.Products.AsNoTracking()
+            return await _dbContext.Products.Where(x=>x.IsDeleted == false).AsNoTracking()
                                           .ToListAsync(cancellationToken);
         }
 
