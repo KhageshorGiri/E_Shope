@@ -1,5 +1,6 @@
 ﻿using ProductService.Application.Dtos;
 using ProductService.Application.MappingProfileExtension;
+using ProductService.Application.Messaging;
 using ProductService.Application.ServiceInterfaces;
 using ProductService.Domain.IRepositories;
 using System.Threading;
@@ -9,10 +10,13 @@ namespace ProductService.Application.Services
     public class ProductsService : IProductService
     {
         private readonly IProductRepository _productRepository;
+        private readonly IEventPublisher _eventPublisher;
+        private readonly string _eventTopic = "product_service_topic";
 
-        public ProductsService(IProductRepository productRepositorycs)
+        public ProductsService(IProductRepository productRepositorycs, IEventPublisher eventPublisher)
         {
             _productRepository = productRepositorycs;
+            _eventPublisher = eventPublisher;
         }
 
         public async Task<ProductDto?> GetByIdAsync(int id, CancellationToken cancellationToken)
@@ -38,6 +42,7 @@ namespace ProductService.Application.Services
             productToAdd.ModifiedDate = DateTime.UtcNow.Date;
 
             await _productRepository.AddAsync(productToAdd, cancellationToken);
+            await _eventPublisher.PublishAsync(_eventTopic, productToAdd.ToString());
         }
 
         public async Task UpdateAsync(int id, UpdateProductDto product, CancellationToken cancellationToken)
@@ -56,6 +61,7 @@ namespace ProductService.Application.Services
             productToUpdate.ModifiedDate = DateTime.UtcNow.Date;
 
             await _productRepository.UpdateAsync(productToUpdate, cancellationToken);
+            await _eventPublisher.PublishAsync(_eventTopic, productToUpdate.ToString());
         }
 
         public async Task DeleteAsync(int id, CancellationToken cancellationToken)

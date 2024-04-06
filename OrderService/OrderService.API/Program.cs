@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using OrderService.API;
+using OrderService.Application.Messaging;
 using OrderService.Application.ServiceInterfaces;
 using OrderService.Application.Services;
 using OrderService.Domain.IRepositories;
@@ -40,6 +41,7 @@ try
     builder.Services.AddScoped<IOrderService, OrdersService>();
     builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
+    builder.Services.AddSingleton<IEventConsumer, KafkaEventConsumer>();
 
     //health checks
     builder.Services.AddHealthChecks()

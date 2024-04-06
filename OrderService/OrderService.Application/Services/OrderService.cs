@@ -1,5 +1,6 @@
 ﻿using OrderService.Application.Dtos;
 using OrderService.Application.MappingProfile;
+using OrderService.Application.Messaging;
 using OrderService.Application.ServiceInterfaces;
 using OrderService.Domain.IRepositories;
 
@@ -8,15 +9,18 @@ namespace OrderService.Application.Services
     public class OrdersService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IEventConsumer _eventConsumer;
 
-        public OrdersService(IOrderRepository orderRepository)
+        public OrdersService(IOrderRepository orderRepository, IEventConsumer eventConsumer)
         {
             _orderRepository = orderRepository;
+            _eventConsumer = eventConsumer;
         }
 
         public async Task<IEnumerable<OrderDto>> GetAllAsync()
         {
             var allOrders = await _orderRepository.GetAllAsync();
+
             return allOrders.Select(order => order.ToOrderDto());
         }
 

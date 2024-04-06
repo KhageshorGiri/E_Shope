@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using ProductService.API;
+using ProductService.Application.Messaging;
 using ProductService.Application.ServiceInterfaces;
 using ProductService.Application.Services;
 using ProductService.Domain.IRepositories;
@@ -39,6 +40,8 @@ try
     // Service Registration
     builder.Services.AddScoped<IProductRepository, ProductRepository>();
     builder.Services.AddScoped<IProductService, ProductsService>();
+
+    builder.Services.AddSingleton<IEventPublisher, KafkaEventPublisher>();
 
     //health checks
     builder.Services.AddHealthChecks()
