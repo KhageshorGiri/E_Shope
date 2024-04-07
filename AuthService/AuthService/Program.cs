@@ -1,3 +1,4 @@
+using AuthService;
 using AuthService.DataContext;
 using AuthService.Dtos;
 using AuthService.Models;
@@ -5,7 +6,6 @@ using AuthService.Services;
 using AuthService.Services.IService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,10 +22,13 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFramework
 
 builder.Services.AddControllers();
 
+ 
+builder.Services.AddJwtTokenValidator(builder.Configuration.GetSection("ApiSettings:JwtOptions:Secret").Value);
+
 builder.Services.AddScoped<IJwtTokenProvider, JswTokenProvider>();
 builder.Services.AddScoped<IAuthService, AuthsService>();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckles
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

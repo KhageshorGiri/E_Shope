@@ -4,6 +4,20 @@
   },
   "Routes": [
 
+    // Route For Auth Service
+    {
+      "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5255
+        }
+      ],
+      "UpstreamPathTemplate": "/auths/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ] // All HTTP methods
+    },
+
     // Route for Product Service
     {
       "DownstreamPathTemplate": "/api/products",

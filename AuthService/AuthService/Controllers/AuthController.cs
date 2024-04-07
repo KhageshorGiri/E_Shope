@@ -1,5 +1,6 @@
 ﻿using AuthService.Dtos;
 using AuthService.Services.IService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,6 +47,7 @@ namespace AuthService.Controllers
             return Ok(_response);
         }
 
+        [Authorize]
         [HttpPost("AssignRole")]
         public async Task<IActionResult> AssignRole([FromBody] RegistrationRequestDto model)
         {
@@ -58,5 +60,6 @@ namespace AuthService.Controllers
             }
             return Ok(_response);
         }
+
     }
 }

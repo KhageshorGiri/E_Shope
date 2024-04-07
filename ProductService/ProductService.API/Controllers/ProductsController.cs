@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProductService.Application.Dtos;
 using ProductService.Application.ServiceInterfaces;
 
@@ -20,6 +21,7 @@ namespace ProductService.API.Controllers
 
         // GET : api/Products
         [HttpGet]
+        [JwtAuthorization]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
             _logger.LogInformation("GET request received for all products.");
