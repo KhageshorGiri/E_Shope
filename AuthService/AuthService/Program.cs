@@ -6,45 +6,77 @@ using AuthService.Services;
 using AuthService.Services.IService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("ApiSettings:JwtOptions"));
+// Loger configuration
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
 
-builder.Services.AddDbContext<AuthServiceDbContext>(option =>
+try
 {
-    option.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AuthServiceDbContext>()
-    .AddDefaultTokenProviders();
+    // Configure serilog logger globally.
+    builder.Logging.ClearProviders();
+    builder.Logging.AddSerilog(logger);
 
-builder.Services.AddControllers();
+    logger.Information("Starting web application");
 
- 
-builder.Services.AddJwtTokenValidator(builder.Configuration.GetSection("ApiSettings:JwtOptions:Secret").Value);
+    // Add services to the container.
 
-builder.Services.AddScoped<IJwtTokenProvider, JswTokenProvider>();
-builder.Services.AddScoped<IAuthService, AuthsService>();
+    builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("ApiSettings:JwtOptions"));
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckles
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+    builder.Services.AddDbContext<AuthServiceDbContext>(option =>
+    {
+        option.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    });
+    builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AuthServiceDbContext>()
+        .AddDefaultTokenProviders();
 
-var app = builder.Build();
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+    //Exception Handeler
+    builder.Services.AddProblemDetails();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+    builder.Services.AddJwtTokenValidator(builder.Configuration.GetSection("ApiSettings:JwtOptions:Secret").Value);
+
+    builder.Services.AddScoped<IJwtTokenProvider, JswTokenProvider>();
+    builder.Services.AddScoped<IAuthService, AuthsService>();
+
+
+    var app = builder.Build();
+
+    app.UseStatusCodePages();
+    app.UseExceptionHandler();
+
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
+}
+catch (Exception ex)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    logger.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
 }
 
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
