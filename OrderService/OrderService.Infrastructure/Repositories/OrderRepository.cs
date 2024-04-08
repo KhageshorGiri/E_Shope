@@ -14,73 +14,71 @@ namespace OrderService.Infrastructure.Repositories
             _dbContext = context;
         }
 
-        public async Task<IEnumerable<Order>> GetAllAsync()
+        public async Task<IEnumerable<Order>> GetAllAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await _dbContext.Orders.AsNoTracking().ToListAsync();
+            return await _dbContext.Orders.AsNoTracking().ToListAsync(cancellationToken);
         }
 
-        public async Task<Order?> GetOrderByIdAsync(int id)
+        public async Task<Order?> GetOrderByIdAsync(int id, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await _dbContext.Orders.Where(x => x.Id == id).AsNoTracking().FirstOrDefaultAsync();
+            return await _dbContext.Orders.Where(x => x.Id == id).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async  Task AddAsync(Order order)
+        public async  Task AddAsync(Order order, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using(var transaction = await _dbContext.Database.BeginTransactionAsync())
+            using(var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken))
             {
                 try
                 {
                     _dbContext.Orders.Add(order);
-                    await _dbContext.SaveChangesAsync();
+                    await _dbContext.SaveChangesAsync(cancellationToken);
 
-                    await transaction.CommitAsync();
+                    await transaction.CommitAsync(cancellationToken);
                 }
                 catch(Exception ex)
                 {
-                    await transaction.RollbackAsync();
+                    await transaction.RollbackAsync(cancellationToken);
                     throw;
                 }
             }
         }
 
-        public async Task UpdateAsync(Order order)
+        public async Task UpdateAsync(Order order, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+            using (var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken))
             {
                 try
                 {
                     _dbContext.Orders.Update(order);
-                    await _dbContext.SaveChangesAsync();
+                    await _dbContext.SaveChangesAsync(cancellationToken);
 
-                    await transaction.CommitAsync();
+                    await transaction.CommitAsync(cancellationToken);
                 }
                 catch (Exception ex)
                 {
-                    await transaction.RollbackAsync();
+                    await transaction.RollbackAsync(cancellationToken);
                     throw;
                 }
             }
         }
 
-        public async Task DeleteAsync(Order order)
+        public async Task DeleteAsync(Order order, CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+            using (var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken))
             {
                 try
                 {
                     _dbContext.Orders.Update(order);
-                    await _dbContext.SaveChangesAsync();
+                    await _dbContext.SaveChangesAsync(cancellationToken);
 
-                    await transaction.CommitAsync();
+                    await transaction.CommitAsync(cancellationToken);
                 }
                 catch (Exception ex)
                 {
-                    await transaction.RollbackAsync();
+                    await transaction.RollbackAsync(cancellationToken);
                     throw;
                 }
             }
         }
-
-       
     }
 }

@@ -17,14 +17,14 @@ namespace OrderService.Application.Services
             _eventConsumer = eventConsumer;
         }
 
-        public async Task<IEnumerable<OrderDto>> GetAllAsync()
+        public async Task<IEnumerable<OrderDto>> GetAllAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             var allOrders = await _orderRepository.GetAllAsync();
 
             return allOrders.Select(order => order.ToOrderDto());
         }
 
-        public async Task<OrderDto?> GetOrderByIdAsync(int id)
+        public async Task<OrderDto?> GetOrderByIdAsync(int id, CancellationToken cancellationToken = default(CancellationToken))
         {
             var order = await _orderRepository.GetOrderByIdAsync(id);
             if (order is null)
@@ -34,7 +34,7 @@ namespace OrderService.Application.Services
             return order.ToOrderDto();
         }
 
-        public async Task AddAsync(CreateOrderDto order)
+        public async Task AddAsync(CreateOrderDto order, CancellationToken cancellationToken = default(CancellationToken))
         {
             var orderToAdd = order.ToOrder();
             orderToAdd.CreatedBy = 1;
@@ -46,7 +46,7 @@ namespace OrderService.Application.Services
             await _orderRepository.AddAsync(orderToAdd);
         }
 
-        public async Task UpdateAsync(int id, UpdateOrderDto order)
+        public async Task UpdateAsync(int id, UpdateOrderDto order, CancellationToken cancellationToken = default(CancellationToken))
         {
             var orderToUpdate = await _orderRepository.GetOrderByIdAsync(id);
             if(orderToUpdate is null)
@@ -59,7 +59,7 @@ namespace OrderService.Application.Services
             await _orderRepository.UpdateAsync(orderToUpdate);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken = default(CancellationToken))
         {
             var orderToDelete = await _orderRepository.GetOrderByIdAsync(id);
             if (orderToDelete is null)

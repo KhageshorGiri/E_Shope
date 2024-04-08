@@ -19,7 +19,7 @@ namespace OrderService.API.Controllers
 
         // GET : api/Orders
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
             var allOrders = await _orderService.GetAllAsync();
             return Ok(allOrders);
@@ -27,7 +27,7 @@ namespace OrderService.API.Controllers
 
         // GET : api/Orders/id
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
         {
             var existingOrder = await _orderService.GetOrderByIdAsync(id);
             if(existingOrder is null)
@@ -39,7 +39,7 @@ namespace OrderService.API.Controllers
 
         // POST : api/Orders
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CreateOrderDto order)
+        public async Task<IActionResult> Post([FromBody] CreateOrderDto order, CancellationToken cancellationToken)
         {
             await _orderService.AddAsync(order);
             return Ok("Added");
@@ -47,7 +47,7 @@ namespace OrderService.API.Controllers
 
         // PUT : api/Orders/id
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] UpdateOrderDto order)
+        public async Task<IActionResult> Put(int id, [FromBody] UpdateOrderDto order, CancellationToken cancellationToken)
         {
             var existingOrder = _orderService.GetOrderByIdAsync(id);
             if(existingOrder is null)
@@ -60,7 +60,7 @@ namespace OrderService.API.Controllers
 
         // DELETE : api/Orders/id
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
             var existingOrder = _orderService.GetOrderByIdAsync(id);
             if (existingOrder is null)

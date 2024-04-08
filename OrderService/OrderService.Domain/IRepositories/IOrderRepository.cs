@@ -4,10 +4,10 @@ namespace OrderService.Domain.IRepositories
 {
     public interface IOrderRepository
     {
-        Task<Order?> GetOrderByIdAsync(int id);
-        Task<IEnumerable<Order>> GetAllAsync();
-        Task AddAsync(Order order);
-        Task UpdateAsync(Order order);
-        Task DeleteAsync(Order order);
+        Task<Order?> GetOrderByIdAsync(int id, CancellationToken cancellationToken);
+        Task<IEnumerable<Order>> GetAllAsync(CancellationToken cancellationToken);
+        Task AddAsync(Order order, CancellationToken cancellationToken);
+        Task UpdateAsync(Order order, CancellationToken cancellationToken);
+        Task DeleteAsync(Order order, CancellationToken cancellationToken);
     }
 }
