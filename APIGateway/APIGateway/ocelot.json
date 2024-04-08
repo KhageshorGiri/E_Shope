@@ -45,6 +45,9 @@
       "UpstreamPathTemplate": "/orders",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ] // All HTTP methods
     },
+    
+    /// Rout For Health Check
+
     // Order Service Health Check
     {
       "DownstreamPathTemplate": "/orderservicehealth",
@@ -56,7 +59,21 @@
         }
       ],
       "UpstreamPathTemplate": "/orderservicehealth",
-      "UpstreamHttpMethod": [ "GET" ] // All HTTP methods
+      "UpstreamHttpMethod": [ "GET" ] 
+    },
+    
+    // Product Service Health check
+    {
+      "DownstreamPathTemplate": "/productservicehealth",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5031
+        }
+      ],
+      "UpstreamPathTemplate": "/productservicehealth",
+      "UpstreamHttpMethod": [ "GET" ]
     }
   ],
   "ReRoutes": [],

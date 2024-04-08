@@ -34,7 +34,7 @@ namespace ProductService.API.Configuration
         private static void HealthCheckMiddlewareConfiguration(WebApplication app)
         {
             // Health check Middleware configuration
-            app.MapHealthChecks("/health", new HealthCheckOptions()
+            app.MapHealthChecks("/productservicehealth", new HealthCheckOptions()
             {
                 ResponseWriter = async (context, report) =>
                 {
