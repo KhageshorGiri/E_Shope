@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using OrderService.API.Controllers;
 using OrderService.Application.Dtos;
@@ -15,14 +17,14 @@ namespace OrderService.UnitTest.Controllers
 
 
         [Fact]
-        public async Task Get_WhenUnExistingProduct_ReturnNotFound()
+        public async Task Get_WhenUnExistingOrdere_ReturnNotFound()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
             serviceStub.Setup(service => service.GetOrderByIdAsync(It.IsAny<int>(), cancellationToken))
                 .ReturnsAsync((OrderDto?)null);
 
-            var controller = new ProductsController(serviceStub.Object, logger.Object);
+            var controller = new OrdersController(serviceStub.Object, logger.Object);
 
             // Act
             var actionResult = await controller.Get(rand.Next(1000), cancellationToken);
@@ -32,17 +34,17 @@ namespace OrderService.UnitTest.Controllers
         }
 
         [Fact]
-        public async Task Get_WithExistingProducts_ReturnExpectedProducts()
+        public async Task Get_WithExistingOrder_ReturnExpectedOrder()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
-            var expectedResult = new[] { RandomProductDto(), RandomProductDto(), RandomProductDto() };
+            var expectedResult = new[] { RandomOrderDto(), RandomOrderDto(), RandomOrderDto() };
 
             serviceStub.Setup(service => service.GetAllAsync(cancellationToken))
                 .ReturnsAsync(expectedResult);
 
 
-            var controller = new ProductsController(serviceStub.Object, logger.Object);
+            var controller = new OrdersController(serviceStub.Object, logger.Object);
 
             // Act
             var actionResult = await controller.Get(cancellationToken);
@@ -50,80 +52,80 @@ namespace OrderService.UnitTest.Controllers
             // Assert
             result?.Value.Should().NotBeNull();
             result?.Value.Should().BeEquivalentTo(expectedResult,
-                optins => optins.ComparingByMembers<ProductDto>());
+                optins => optins.ComparingByMembers<OrderDto>());
         }
 
         [Fact]
-        public async Task Post_WithProductToAdd_ReturnResponseOk()
+        public async Task Post_WithOrderToAdd_ReturnResponseOk()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
-            var productToAdd = CreateRandomProductDto();
+            var orderToAdd = CreateRandomOrderDto();
 
-            var controller = new ProductsController(serviceStub.Object, logger.Object);
+            var controller = new OrdersController(serviceStub.Object, logger.Object);
 
             // Act
-            var actionResult = await controller.Post(productToAdd, cancellationToken);
+            var actionResult = await controller.Post(orderToAdd, cancellationToken);
             var result = actionResult as OkObjectResult;
 
             // Assert
-            result.Value.Should().BeEquivalentTo("Success.");
+            result?.Value.Should().BeEquivalentTo("Added");
             actionResult.Should().BeAssignableTo<OkObjectResult>();
         }
 
         [Fact]
-        public async Task Post_InvalidProduct_ReturnsBadRequest()
+        public async Task Post_InvalidOrder_ReturnsBadRequest()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
-            var productToAdd = CreateRandomProductDto();
-            productToAdd.ProductName = null;
+            var orderToAdd = CreateRandomOrderDto();
+            orderToAdd.ProductName = null;
 
-            var controller = new ProductsController(serviceStub.Object, logger.Object);
+            var controller = new OrdersController(serviceStub.Object, logger.Object);
             controller.ModelState.AddModelError("Name", "Name is required");
             controller.ModelState.AddModelError("Price", "Price must be positive");
 
             // Act
-            var result = await controller.Post(productToAdd, cancellationToken);
+            var result = await controller.Post(orderToAdd, cancellationToken);
 
             // Assert
             result.Should().BeOfType<BadRequestObjectResult>();
         }
 
         [Fact]
-        public async Task Put_WhenNonExistingProduct_ReturnsNoContent()
+        public async Task Put_WhenNonExistingOrder_ReturnsNoContent()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
-            var existingProduct = UpdateRandomProductDto();
+            var existingOrder = UpdateRandomOrderDto();
 
-            serviceStub.Setup(service => service.GetByIdAsync(It.IsAny<int>(), cancellationToken))
-                .ReturnsAsync((ProductDto?)null);
+            serviceStub.Setup(service => service.GetOrderByIdAsync(It.IsAny<int>(), cancellationToken))
+                .ReturnsAsync((OrderDto?)null);
 
-            var controller = new ProductsController(serviceStub.Object, logger.Object);
+            var controller = new OrdersController(serviceStub.Object, logger.Object);
 
             // Act
-            var result = await controller.Put(It.IsAny<int>(), existingProduct, cancellationToken);
+            var result = await controller.Put(It.IsAny<int>(), existingOrder, cancellationToken);
 
             // Assert
             result.Should().BeOfType<NoContentResult>();
         }
 
         [Fact]
-        public async Task Put_WhenExistingProduct_ReturnsOk()
+        public async Task Put_WhenExistingOrder_ReturnsOk()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
-            var existingProduct = UpdateRandomProductDto();
-            var expectedProduct = RandomProductDto();
+            var existingOrder = UpdateRandomOrderDto();
+            var expectedOrder = RandomOrderDto();
 
-            serviceStub.Setup(service => service.GetByIdAsync(It.IsAny<int>(), cancellationToken))
-                .ReturnsAsync(expectedProduct);
+            serviceStub.Setup(service => service.GetOrderByIdAsync(It.IsAny<int>(), cancellationToken))
+                .ReturnsAsync(expectedOrder);
 
-            var controller = new ProductsController(serviceStub.Object, logger.Object);
+            var controller = new OrdersController(serviceStub.Object, logger.Object);
 
             // Act
-            var result = await controller.Put(It.IsAny<int>(), existingProduct, cancellationToken);
+            var result = await controller.Put(It.IsAny<int>(), existingOrder, cancellationToken);
             var okResult = result as OkObjectResult;
 
             // Assert
@@ -132,33 +134,33 @@ namespace OrderService.UnitTest.Controllers
         }
 
         [Fact]
-        public async Task Put_InvalidProduct_ReturnsBadRequest()
+        public async Task Put_InvalidOrder_ReturnsBadRequest()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
-            var productToUpdate = UpdateRandomProductDto();
-            productToUpdate.ProductName = null;
+            var OrderToUpdate = UpdateRandomOrderDto();
+            OrderToUpdate.ProductName = null;
 
-            var controller = new ProductsController(serviceStub.Object, logger.Object);
+            var controller = new OrdersController(serviceStub.Object, logger.Object);
             controller.ModelState.AddModelError("Name", "Name is required");
             controller.ModelState.AddModelError("Price", "Price must be positive");
 
             // Act
-            var result = await controller.Put(It.IsAny<int>(), productToUpdate, cancellationToken);
+            var result = await controller.Put(It.IsAny<int>(), OrderToUpdate, cancellationToken);
 
             // Assert
             result.Should().BeOfType<BadRequestObjectResult>();
         }
 
         [Fact]
-        public async Task Delete_ProductDoesNotExist_ReturnsNoContent()
+        public async Task Delete_OrderDoesNotExist_ReturnsNoContent()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
-            serviceStub.Setup(service => service.GetByIdAsync(It.IsAny<int>(), cancellationToken))
-                              .ReturnsAsync((ProductDto?)null); // Assuming product does not exist
+            serviceStub.Setup(service => service.GetOrderByIdAsync(It.IsAny<int>(), cancellationToken))
+                              .ReturnsAsync((OrderDto?)null); // Assuming product does not exist
 
-            var controller = new ProductsController(serviceStub.Object, logger.Object);
+            var controller = new OrdersController(serviceStub.Object, logger.Object);
 
             // Act
             var result = await controller.Delete(It.IsAny<int>(), cancellationToken);
@@ -168,18 +170,18 @@ namespace OrderService.UnitTest.Controllers
         }
 
         [Fact]
-        public async Task Delete_ProductExists_ReturnsOk()
+        public async Task Delete_OrderExists_ReturnsOk()
         {
             // Arrange
             var cancellationToken = new CancellationToken();
-            var expectedPrduct = RandomProductDto();
-            serviceStub.Setup(service => service.GetByIdAsync(It.IsAny<int>(), cancellationToken))
+            var expectedPrduct = RandomOrderDto();
+            serviceStub.Setup(service => service.GetOrderByIdAsync(It.IsAny<int>(), cancellationToken))
                               .ReturnsAsync(expectedPrduct);
 
             serviceStub.Setup(service => service.DeleteAsync(It.IsAny<int>(), cancellationToken))
                               .Returns(Task.CompletedTask);
 
-            var controller = new ProductsController(serviceStub.Object, logger.Object);
+            var controller = new OrdersController(serviceStub.Object, logger.Object);
 
             // Act
             var result = await controller.Delete(It.IsAny<int>(), cancellationToken);
@@ -187,37 +189,40 @@ namespace OrderService.UnitTest.Controllers
 
             // Assert
             result.Should().BeOfType<OkObjectResult>();
-            okResult?.Value.Should().Be("Deleted.");
+            okResult?.Value.Should().Be("Deleted");
         }
 
         #region Private Helper Function
 
-        private ProductDto RandomProductDto()
+        private OrderDto RandomOrderDto()
         {
             return new()
             {
                 Id = rand.Next(100),
-                ProductName = "Test Prduct",
-                ProductDescription = "Test Description",
-                Price = rand.Next(1000)
+                ProductName = "Test Order",
+                OrderDescription = "Test Description",
+                OrderDate = DateTime.UtcNow,
+                OrderDeliveryDate = DateTime.UtcNow
             };
         }
-        private CreateProductDto CreateRandomProductDto()
+        private CreateOrderDto CreateRandomOrderDto()
         {
             return new()
             {
-                ProductName = "Test Prduct",
-                ProductDescription = "Test Description",
-                Price = rand.Next(1000)
+                ProductName = "Test Order",
+                OrderDescription = "Test Description",
+                OrderDate = DateTime.UtcNow,
+                OrderDeliveryDate = DateTime.UtcNow
             };
         }
-        private UpdateProductDto UpdateRandomProductDto()
+        private UpdateOrderDto UpdateRandomOrderDto()
         {
             return new()
             {
-                ProductName = "Test Prduct",
-                ProductDescription = "Test Description",
-                Price = rand.Next(1000)
+                ProductName = "Test Order",
+                OrderDescription = "Test Description",
+                OrderDate = DateTime.UtcNow,
+                OrderDeliveryDate = DateTime.UtcNow
             };
         }
 

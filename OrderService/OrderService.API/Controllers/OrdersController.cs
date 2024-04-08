@@ -11,17 +11,19 @@ namespace OrderService.API.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly ILogger<OrdersController> _logger;
 
-        public OrdersController(IOrderService orderService)
+        public OrdersController(IOrderService orderService, ILogger<OrdersController> logger)
         {
             _orderService = orderService;
+            _logger = logger;
         }
 
         // GET : api/Orders
         [HttpGet]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
-            var allOrders = await _orderService.GetAllAsync();
+            var allOrders = await _orderService.GetAllAsync(cancellationToken);
             return Ok(allOrders);
         }
 
@@ -29,7 +31,7 @@ namespace OrderService.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
         {
-            var existingOrder = await _orderService.GetOrderByIdAsync(id);
+            var existingOrder = await _orderService.GetOrderByIdAsync(id, cancellationToken);
             if(existingOrder is null)
             {
                 return NoContent();
@@ -41,7 +43,11 @@ namespace OrderService.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateOrderDto order, CancellationToken cancellationToken)
         {
-            await _orderService.AddAsync(order);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            await _orderService.AddAsync(order, cancellationToken);
             return Ok("Added");
         }
 
@@ -49,12 +55,16 @@ namespace OrderService.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] UpdateOrderDto order, CancellationToken cancellationToken)
         {
-            var existingOrder = _orderService.GetOrderByIdAsync(id);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var existingOrder = await _orderService.GetOrderByIdAsync(id, cancellationToken);
             if(existingOrder is null)
             {
                 return NoContent();
             }
-            await _orderService.UpdateAsync(id, order);
+            await _orderService.UpdateAsync(id, order, cancellationToken);
             return Ok("Updated");
         }
 
@@ -62,12 +72,12 @@ namespace OrderService.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var existingOrder = _orderService.GetOrderByIdAsync(id);
+            var existingOrder = await _orderService.GetOrderByIdAsync(id, cancellationToken);
             if (existingOrder is null)
             {
                 return NoContent();
             }
-            await _orderService.DeleteAsync(id);
+            await _orderService.DeleteAsync(id, cancellationToken);
             return Ok("Deleted");
         }
     }

@@ -19,14 +19,14 @@ namespace OrderService.Application.Services
 
         public async Task<IEnumerable<OrderDto>> GetAllAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            var allOrders = await _orderRepository.GetAllAsync();
+            var allOrders = await _orderRepository.GetAllAsync(cancellationToken);
 
             return allOrders.Select(order => order.ToOrderDto());
         }
 
         public async Task<OrderDto?> GetOrderByIdAsync(int id, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var order = await _orderRepository.GetOrderByIdAsync(id);
+            var order = await _orderRepository.GetOrderByIdAsync(id, cancellationToken);
             if (order is null)
             {
                 throw new ArgumentOutOfRangeException($"Order with Id {id} not found.");
@@ -43,12 +43,12 @@ namespace OrderService.Application.Services
             orderToAdd.CreatedDate = DateTime.UtcNow.Date;
             orderToAdd.ModifiedDate = DateTime.UtcNow.Date;
 
-            await _orderRepository.AddAsync(orderToAdd);
+            await _orderRepository.AddAsync(orderToAdd, cancellationToken);
         }
 
         public async Task UpdateAsync(int id, UpdateOrderDto order, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var orderToUpdate = await _orderRepository.GetOrderByIdAsync(id);
+            var orderToUpdate = await _orderRepository.GetOrderByIdAsync(id, cancellationToken);
             if(orderToUpdate is null)
             {
                 throw new ArgumentOutOfRangeException($"Order with Id {id} not found.");
@@ -56,12 +56,12 @@ namespace OrderService.Application.Services
             orderToUpdate.ModifiedBy = 2;
             orderToUpdate.ModifiedDate = DateTime.UtcNow.Date;
 
-            await _orderRepository.UpdateAsync(orderToUpdate);
+            await _orderRepository.UpdateAsync(orderToUpdate, cancellationToken);
         }
 
         public async Task DeleteAsync(int id, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var orderToDelete = await _orderRepository.GetOrderByIdAsync(id);
+            var orderToDelete = await _orderRepository.GetOrderByIdAsync(id, cancellationToken);
             if (orderToDelete is null)
             {
                 throw new ArgumentOutOfRangeException($"Order with Id {id} not found.");
@@ -70,7 +70,7 @@ namespace OrderService.Application.Services
             orderToDelete.ModifiedDate = DateTime.UtcNow.Date;
             orderToDelete.IsDeleted = true;
 
-            await _orderRepository.DeleteAsync(orderToDelete);
+            await _orderRepository.DeleteAsync(orderToDelete, cancellationToken);
         }
 
     }
