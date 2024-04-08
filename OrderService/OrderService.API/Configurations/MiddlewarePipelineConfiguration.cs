@@ -33,7 +33,7 @@ namespace OrderService.API.Configurations
         private static void HealthCheckMiddlewareConfiguration(WebApplication app)
         {
             // Health check Middleware configuration
-            app.MapHealthChecks("/health", new HealthCheckOptions()
+            app.MapHealthChecks("/orderservicehealth", new HealthCheckOptions()
             {
                 ResponseWriter = async (context, report) =>
                 {

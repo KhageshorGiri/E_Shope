@@ -39,11 +39,24 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 8081
+          "Port": 5105
         }
       ],
       "UpstreamPathTemplate": "/orders",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ] // All HTTP methods
+    },
+    // Order Service Health Check
+    {
+      "DownstreamPathTemplate": "/orderservicehealth",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5105
+        }
+      ],
+      "UpstreamPathTemplate": "/orderservicehealth",
+      "UpstreamHttpMethod": [ "GET" ] // All HTTP methods
     }
   ],
   "ReRoutes": [],
