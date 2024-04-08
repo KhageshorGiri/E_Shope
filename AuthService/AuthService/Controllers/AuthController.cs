@@ -25,6 +25,12 @@ namespace AuthService.Controllers
         public async Task<IActionResult> Register([FromBody] RegistrationRequestDto model)
         {
             _logger.LogInformation("Get request For Regitration with {0}", JsonSerializer.Serialize(model));
+            if (!ModelState.IsValid)
+            {
+                _response.Message = ModelState.ToString();
+                return BadRequest(_response);
+            }
+
             var errorMessage = await _authService.Register(model);
             if (!string.IsNullOrEmpty(errorMessage))
             {
@@ -33,6 +39,7 @@ namespace AuthService.Controllers
                 _logger.LogInformation("Request For Regitration completed with {0}", errorMessage);
                 return BadRequest(_response);
             }
+
             _logger.LogInformation("Request For Regitration for {0} Completed with {1}", JsonSerializer.Serialize(model), _response.ToString());
             return Ok(_response);
         }
@@ -40,8 +47,13 @@ namespace AuthService.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto model)
         {
-            // Convert model to a string for logging
             _logger.LogInformation("Get request For Login for {0}", JsonSerializer.Serialize(model));
+            if (!ModelState.IsValid)
+            {
+                _response.Message = ModelState.ToString();
+                return BadRequest(_response);
+            }
+
             var loginResponse = await _authService.Login(model);
             if (loginResponse.User == null)
             {
@@ -50,6 +62,7 @@ namespace AuthService.Controllers
                 _logger.LogInformation("Request For Login completed for {0} with {1}", JsonSerializer.Serialize(model), _response.Message);
                 return BadRequest(_response);
             }
+
             _response.Result = loginResponse;
             _logger.LogInformation("Request For Login for {0} Completed with {1}", JsonSerializer.Serialize(model), loginResponse);
             return Ok(_response);
@@ -60,6 +73,12 @@ namespace AuthService.Controllers
         public async Task<IActionResult> AssignRole([FromBody] RegistrationRequestDto model)
         {
             _logger.LogInformation("Get request For AssignRole for {0}", JsonSerializer.Serialize(model));
+            if (!ModelState.IsValid)
+            {
+                _response.Message = ModelState.ToString();
+                return BadRequest(_response);
+            }
+
             var assignRoleSuccessful = await _authService.AssignRole(model.Email, model.Role.ToUpper());
             if (!assignRoleSuccessful)
             {
@@ -68,6 +87,7 @@ namespace AuthService.Controllers
                 _logger.LogInformation("Completed request For Login completed with {0}", assignRoleSuccessful);
                 return BadRequest(_response);
             }
+
             _logger.LogInformation("Request For AssignRole for {0} Completed with {1}", JsonSerializer.Serialize(model), _response);
             return Ok(_response);
         }
