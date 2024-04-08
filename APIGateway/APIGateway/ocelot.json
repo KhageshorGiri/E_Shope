@@ -2,6 +2,7 @@
   "GlobalConfiguration": {
     "BaseUrl": "https://localhost:7279/" // Base URL for the services
   },
+
   "Routes": [
 
     // Route For Auth Service
@@ -44,38 +45,9 @@
       ],
       "UpstreamPathTemplate": "/orders",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" ] // All HTTP methods
-    },
-    
-    /// Rout For Health Check
-
-    // Order Service Health Check
-    {
-      "DownstreamPathTemplate": "/orderservicehealth",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5105
-        }
-      ],
-      "UpstreamPathTemplate": "/orderservicehealth",
-      "UpstreamHttpMethod": [ "GET" ] 
-    },
-    
-    // Product Service Health check
-    {
-      "DownstreamPathTemplate": "/productservicehealth",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5031
-        }
-      ],
-      "UpstreamPathTemplate": "/productservicehealth",
-      "UpstreamHttpMethod": [ "GET" ]
-    }
+    }   
   ],
+
   "ReRoutes": [],
   "Aggregates": []
 }

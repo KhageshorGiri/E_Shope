@@ -4,9 +4,12 @@ using AuthService.Dtos;
 using AuthService.Models;
 using AuthService.Services;
 using AuthService.Services.IService;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Net.Mime;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +38,10 @@ try
     });
     builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AuthServiceDbContext>()
         .AddDefaultTokenProviders();
+
+    // Add Health check
+    builder.Services.AddHealthChecks()
+        .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")); ;
 
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
@@ -68,6 +75,29 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
+
+    // Health check Middleware configuration
+    app.MapHealthChecks("/authservicehealth", new HealthCheckOptions()
+    {
+        ResponseWriter = async (context, report) =>
+        {
+            var result = JsonSerializer.Serialize(
+                new
+                {
+                    status = report.Status.ToString(),
+                    checks = report.Entries.Select(entry => new
+                    {
+                        name = entry.Key.ToString(),
+                        status = entry.Value.Status.ToString(),
+                        exception = entry.Value.Exception is not null ? entry.Value.Exception.Message : "none",
+                        duration = entry.Value.Duration.ToString()
+                    })
+                });
+
+            context.Response.ContentType = MediaTypeNames.Application.Json;
+            await context.Response.WriteAsync(result);
+        }
+    });
 
     app.Run();
 }
