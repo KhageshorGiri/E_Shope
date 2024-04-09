@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using Microsoft.AspNetCore.Authorization;
 
 public class JwtAuthorizationAttribute : Attribute, IAuthorizationFilter
 {

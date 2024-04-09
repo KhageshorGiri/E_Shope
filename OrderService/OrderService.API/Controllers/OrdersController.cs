@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OrderService.API.Filters;
 using OrderService.Application.Dtos;
 using OrderService.Application.ServiceInterfaces;
 
@@ -8,6 +9,7 @@ namespace OrderService.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Produces("application/json")]
+    [JwtAuthorization]
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;

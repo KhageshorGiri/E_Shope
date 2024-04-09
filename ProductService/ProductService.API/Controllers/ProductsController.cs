@@ -8,6 +8,7 @@ namespace ProductService.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Produces("application/json")]
+    [JwtAuthorization]
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -21,7 +22,6 @@ namespace ProductService.API.Controllers
 
         // GET : api/Products
         [HttpGet]
-        [JwtAuthorization]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
             _logger.LogInformation("GET request received for all products.");
