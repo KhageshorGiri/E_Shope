@@ -84,7 +84,7 @@ namespace AuthService.Controllers
             {
                 _response.IsSuccess = false;
                 _response.Message = "Error encountered";
-                _logger.LogInformation("Completed request For Login completed with {0}", assignRoleSuccessful);
+                _logger.LogInformation("Completed request For AssignRole completed with {0}", assignRoleSuccessful);
                 return BadRequest(_response);
             }
 
